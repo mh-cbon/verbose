@@ -2,6 +2,13 @@
 
 A library to display verbose messages per package.
 
+__wip__
+
+__wip__
+
+__wip__
+
+
 # Install
 
 ```sh
