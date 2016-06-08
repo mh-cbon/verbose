@@ -3,13 +3,15 @@ package verbose
 
 import (
 	// "fmt"
-	"github.com/mh-cbon/verbose/printer"
 	"os"
 	"path/filepath"
 	"regexp"
 	"runtime"
 	"strings"
 	"sync"
+
+  "github.com/mh-cbon/verbose/printer"
+  "github.com/fatih/color"
 )
 
 var mainPath string
@@ -179,6 +181,30 @@ func (r *runtimeVerbose) isEnabled(from string) bool {
 	return isEnabled
 }
 
+type colorFunc func (format string, a ...interface{}) string
+func getColors () []colorFunc {
+  return []colorFunc{
+    color.CyanString,
+    color.YellowString,
+    color.GreenString,
+    color.MagentaString,
+    color.RedString,
+    color.BlueString,
+    color.WhiteString,
+  }
+}
+
+var colorsFunc = getColors()
+var currentColor = 0
+func pickColor () colorFunc {
+  ret := colorsFunc[currentColor]
+  currentColor++
+  if currentColor>len(colorsFunc) {
+    currentColor = 0
+  }
+  return ret
+}
+
 var runtimeV *runtimeVerbose
 var loggerMutex = &sync.Mutex{}
 
@@ -204,15 +230,17 @@ func Auto() *Logger {
 func From(name string) *Logger {
 	initRuntimeVerbose()
 	return &Logger{
-		name:    name,
-		enabled: runtimeV.isEnabled(name),
+		name:     name,
+		enabled:  runtimeV.isEnabled(name),
+    color:    pickColor(),
 	}
 }
 
 // instance of a logger
 type Logger struct {
-	name    string
-	enabled bool
+	name     string
+	enabled  bool
+	color    colorFunc
 }
 
 // Configure current Printer
@@ -223,16 +251,16 @@ func SetPrinter(p printer.Printer) {
 // Methods to display messages
 func (l *Logger) Printf(format string, a ...interface{}) {
 	if l.enabled {
-		currentPrinter.Printf(l.name, "%s: "+format, a...)
+		currentPrinter.Printf(l.color(l.name), "%s: "+format, a...)
 	}
 }
 func (l *Logger) Print(a ...interface{}) {
 	if l.enabled {
-		currentPrinter.Print(l.name, a...)
+		currentPrinter.Print(l.color(l.name), a...)
 	}
 }
 func (l *Logger) Println(a ...interface{}) {
 	if l.enabled {
-		currentPrinter.Println(l.name, a...)
+		currentPrinter.Println(l.color(l.name), a...)
 	}
 }

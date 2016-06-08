@@ -4,6 +4,8 @@ package printer
 import (
 	"fmt"
 	"log"
+
+  // "github.com/fatih/color"
 )
 
 // Printer is the interface to implement to log message via verbose package
@@ -18,7 +20,7 @@ type FmtPrinter struct{}
 
 // Print with a format
 func (p FmtPrinter) Printf(pkg string, format string, a ...interface{}) {
-	format = "%s: " + format
+	format = "%s " + format
 	b := make([]interface{}, 1)
 	b[0] = pkg
 	a = append(b, a...)
@@ -27,7 +29,6 @@ func (p FmtPrinter) Printf(pkg string, format string, a ...interface{}) {
 
 // Print given arguments
 func (p FmtPrinter) Print(pkg string, a ...interface{}) {
-	pkg = pkg + ":"
 	b := make([]interface{}, 1)
 	b[0] = pkg
 	a = append(b, a...)
@@ -36,7 +37,6 @@ func (p FmtPrinter) Print(pkg string, a ...interface{}) {
 
 // Print given arguments with an ending line
 func (p FmtPrinter) Println(pkg string, a ...interface{}) {
-	pkg = pkg + ":"
 	b := make([]interface{}, 1)
 	b[0] = pkg
 	a = append(b, a...)
@@ -48,7 +48,7 @@ type LogPrinter struct{}
 
 // Print with a format
 func (p LogPrinter) Printf(pkg string, format string, a ...interface{}) {
-	format = "%s: " + format
+	format = "%s " + format
 	b := make([]interface{}, 1)
 	b[0] = pkg
 	a = append(b, a...)
@@ -57,7 +57,6 @@ func (p LogPrinter) Printf(pkg string, format string, a ...interface{}) {
 
 // Print given arguments
 func (p LogPrinter) Print(pkg string, a ...interface{}) {
-	pkg = pkg + ":"
 	b := make([]interface{}, 1)
 	b[0] = pkg
 	a = append(b, a...)
@@ -66,7 +65,6 @@ func (p LogPrinter) Print(pkg string, a ...interface{}) {
 
 // Print given arguments with an ending line
 func (p LogPrinter) Println(pkg string, a ...interface{}) {
-	pkg = pkg + ":"
 	b := make([]interface{}, 1)
 	b[0] = pkg
 	a = append(b, a...)
