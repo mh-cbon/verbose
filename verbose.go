@@ -2,19 +2,22 @@
 package verbose
 
 import (
-  "fmt"
+  // "fmt"
   "runtime"
   "path/filepath"
   "strings"
   "regexp"
   "os"
   "sync"
+  "github.com/mh-cbon/verbose/printer"
 )
 
 var mainPath string
 var mutex = &sync.Mutex{}
+var currentPrinter printer.Printer
 
 func init () {
+  currentPrinter = printer.LogPrinter{}
   _,mainPath,_,_ = runtime.Caller(1)
   mainPath = filepath.Dir(mainPath)
 }
@@ -205,14 +208,31 @@ func From (name string) *Logger {
   }
 }
 
+// instance of a logger
 type Logger struct {
   name string
   enabled bool
 }
 
-// same as log.Println
-func (l *Logger) Println (msg string) {
+
+// Configure current Printer
+func SetPrinter (p printer.Printer) {
+  currentPrinter = p
+}
+
+// Methods to display messages
+func (l *Logger) Printf (format string, a ...interface{}) {
   if l.enabled {
-    fmt.Println(msg)
+    currentPrinter.Printf(format, a...)
+  }
+}
+func (l *Logger) Print (a ...interface{}) {
+  if l.enabled {
+    currentPrinter.Print(a...)
+  }
+}
+func (l *Logger) Println (a ...interface{}) {
+  if l.enabled {
+    currentPrinter.Println(a...)
   }
 }

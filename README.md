@@ -2,11 +2,7 @@
 
 A library to display verbose messages per package.
 
-__wip__
-
-__wip__
-
-__wip__
+Read the doc at [godoc](https://godoc.org/github.com/mh-cbon/verbose)
 
 
 # Install
@@ -49,4 +45,44 @@ when `VERBOSE=*` all log messages will display
 
 ```
 VERBOSE=* goprogram
+```
+
+# Configuring the printer
+
+Using `verbose.SetPrinter(p printer.Printer)` you can define the printer at runtime.
+
+To avoid collision, its preferable to configure it into `main`
+
+The default printer is `LogPrinter` a wrapper of `go/log` package.
+
+```go
+package main
+
+import (
+  "fmt"
+  "github.com/mh-cbon/verbose"
+  "github.com/mh-cbon/verbose/printer"
+  "test"
+)
+
+var logger = verbose.Auto()
+
+func main () {
+
+  verbose.SetPrinter(printer.FmtPrinter{}) // changed to a wrapper of go/fmt
+
+  fmt.Println("Hello from main")
+  logger.Println("message to log from main github.com/mh-cbon/verbose")
+  a.Hello()
+}
+```
+
+#### printer.Printer interface
+
+```go
+type Printer interface {
+  Printf(format string, a ...interface{})
+  Print(v ...interface{})
+  Println(v ...interface{})
+}
 ```
