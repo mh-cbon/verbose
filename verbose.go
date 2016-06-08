@@ -1,3 +1,4 @@
+// A library to display verbose messages per package.
 package verbose
 
 import (
@@ -14,12 +15,12 @@ var mainPath string
 var mutex = &sync.Mutex{}
 
 func init () {
-  _,mainPath,_,_ = runtime.Caller(2)
+  _,mainPath,_,_ = runtime.Caller(1)
   mainPath = filepath.Dir(mainPath)
-  // fmt.Printf("---- %s\n", mainPath) // a kind of problem here with go test
 }
 
-type RuntimeVerbose struct {
+// stores information about runtime
+type runtimeVerbose struct {
   MainFile string
   IsWindows bool
   Gopath string
@@ -28,7 +29,8 @@ type RuntimeVerbose struct {
   hasInit bool
 }
 
-func (r *RuntimeVerbose) InitFromMain() {
+// initiliaze from the entry point determmined at runtime
+func (r *runtimeVerbose) InitFromMain() {
   mutex.Lock()
   if r.hasInit==false {
     r.Init(mainPath)
@@ -36,7 +38,8 @@ func (r *RuntimeVerbose) InitFromMain() {
   mutex.Unlock()
 }
 
-func (r *RuntimeVerbose) Init(from string) {
+// initialize from a pre defined entry point
+func (r *runtimeVerbose) Init(from string) {
   if r.hasInit {
     return
   }
@@ -48,7 +51,14 @@ func (r *RuntimeVerbose) Init(from string) {
   r.initVerboseRegexp()
 }
 
-func (r *RuntimeVerbose) initVerboseRegexp() {
+// transforms the value of VERBOSE env var into a
+// slice of regexp
+// VERBOSE is a string of comma separated pattern package
+// when a pattern package contains *, it is replaced by .+
+// examples:
+// VERBOSE=* => .+
+// VERBOSE=this/pkg* => this/pkg.+
+func (r *runtimeVerbose) initVerboseRegexp() {
   items := strings.Split(r.VerboseEnv, ",")
 
   for _, v := range items {
@@ -60,7 +70,10 @@ func (r *RuntimeVerbose) initVerboseRegexp() {
   }
 }
 
-func (r *RuntimeVerbose) determineGoPath(from string) string {
+// Given a string path return the part preceding the first src/
+// example:
+// from= /some/path/src/whatever => /some/path
+func (r *runtimeVerbose) determineGoPath(from string) string {
   pathItems := strings.Split(from, "/")
   if r.IsWindows {
     pathItems = strings.Split(from, "\\")
@@ -82,7 +95,15 @@ func (r *RuntimeVerbose) determineGoPath(from string) string {
   return gopath
 }
 
-func (r *RuntimeVerbose) DeterminePackage(from string) string {
+// Given a string path return the package name
+// When it s a package hosted into GOPATH,
+// it returns the part following the first src/
+// When it s a package hosteed in vendor/
+// it returns the part following the last vendor/
+// example:
+// from= /some/whatever/src/package/ => package
+// from= /some/whatever/src/package/vendor/sub => sub
+func (r *runtimeVerbose) DeterminePackage(from string) string {
   var pkg string
   if r.isVendored(from) {
     pkg = r.pathFromVendor(from)
@@ -92,7 +113,11 @@ func (r *RuntimeVerbose) DeterminePackage(from string) string {
   return pkg
 }
 
-func (r *RuntimeVerbose) pathFromVendor (from string) string {
+// Given a string path to a vendored package,
+// returns the package name
+// example:
+// from= /some/whatever/src/package/vendor/sub => sub
+func (r *runtimeVerbose) pathFromVendor (from string) string {
   pathItems := strings.Split(from, "/")
   if r.IsWindows {
     pathItems = strings.Split(from, "\\")
@@ -114,11 +139,15 @@ func (r *RuntimeVerbose) pathFromVendor (from string) string {
   return filepath.Dir(from[strlen:])
 }
 
-func (r *RuntimeVerbose) pathFromGopath (path string) string {
+// Given a string path to a GOPATH hosted package,
+// returns the package name
+// example:
+// from= /some/whatever/src/package/ => package
+func (r *runtimeVerbose) pathFromGopath (path string) string {
   return filepath.Dir(path[len(r.Gopath)+len("/src/"):])
 }
 
-func (r *RuntimeVerbose) isVendored (from string) bool {
+func (r *runtimeVerbose) isVendored (from string) bool {
   pathItems := strings.Split(from, "/")
   if r.IsWindows {
     pathItems = strings.Split(from, "\\")
@@ -134,7 +163,9 @@ func (r *RuntimeVerbose) isVendored (from string) bool {
   return index>-1
 }
 
-func (r *RuntimeVerbose) isEnabled (from string) bool {
+// Given VERBOSE and a package name,
+// tells if the log are enabled for this package
+func (r *runtimeVerbose) isEnabled (from string) bool {
   isEnabled := false
   for _, reg := range r.VerboseRegs {
     if reg.MatchString(from) {
@@ -145,28 +176,29 @@ func (r *RuntimeVerbose) isEnabled (from string) bool {
   return isEnabled
 }
 
-var runtimeV *RuntimeVerbose
-
+var runtimeV *runtimeVerbose
 var loggerMutex = &sync.Mutex{}
 
-func Auto () *Logger {
+func initRuntimeVerbose () {
   loggerMutex.Lock()
   if runtimeV==nil {
-    runtimeV = &RuntimeVerbose{}
+    runtimeV = &runtimeVerbose{}
   }
   runtimeV.InitFromMain()
+  loggerMutex.Unlock()
+}
+
+// Automatically determine package name
+// return a new Logger instance
+func Auto () *Logger {
+  initRuntimeVerbose()
   _,file,_,_ := runtime.Caller(1)
   name := runtimeV.DeterminePackage(file)
-  loggerMutex.Unlock()
   return From(name)
 }
+// Return a new Logger with given name
 func From (name string) *Logger {
-  loggerMutex.Lock()
-  if runtimeV==nil {
-    runtimeV = &RuntimeVerbose{}
-  }
-  runtimeV.InitFromMain()
-  loggerMutex.Unlock()
+  initRuntimeVerbose()
   return &Logger{
     name:     name,
     enabled:  runtimeV.isEnabled(name),
@@ -178,6 +210,7 @@ type Logger struct {
   enabled bool
 }
 
+// same as log.Println
 func (l *Logger) Println (msg string) {
   if l.enabled {
     fmt.Println(msg)
