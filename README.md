@@ -4,6 +4,7 @@ A library to display verbose messages per package.
 
 Read the doc at [godoc](https://godoc.org/github.com/mh-cbon/verbose)
 
+![demo](https://raw.githubusercontent.com/mh-cbon/verbose/master/demo.jpg)
 
 # Install
 
