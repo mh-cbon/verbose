@@ -223,16 +223,16 @@ func SetPrinter (p printer.Printer) {
 // Methods to display messages
 func (l *Logger) Printf (format string, a ...interface{}) {
   if l.enabled {
-    currentPrinter.Printf(format, a...)
+    currentPrinter.Printf(l.name, "%s: " + format, a...)
   }
 }
 func (l *Logger) Print (a ...interface{}) {
   if l.enabled {
-    currentPrinter.Print(a...)
+    currentPrinter.Print(l.name, a...)
   }
 }
 func (l *Logger) Println (a ...interface{}) {
   if l.enabled {
-    currentPrinter.Println(a...)
+    currentPrinter.Println(l.name, a...)
   }
 }

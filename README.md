@@ -81,8 +81,8 @@ func main () {
 
 ```go
 type Printer interface {
-  Printf(format string, a ...interface{})
-  Print(v ...interface{})
-  Println(v ...interface{})
+  Printf(pkg string, format string, a ...interface{})
+  Print(pkg string, v ...interface{})
+  Println(pkg string, v ...interface{})
 }
 ```
