@@ -10,8 +10,8 @@ import (
 	"strings"
 	"sync"
 
-  "github.com/mh-cbon/verbose/printer"
-  "github.com/mh-cbon/verbose/color"
+	"github.com/mh-cbon/verbose/color"
+	"github.com/mh-cbon/verbose/printer"
 )
 
 var mainPath string
@@ -19,7 +19,7 @@ var mainPath string
 // find path of the entry point
 // set default printer
 func init() {
-  SetPrinter(printer.LogPrinter{})
+	SetPrinter(printer.LogPrinter{})
 	_, mainPath, _, _ = runtime.Caller(1)
 	mainPath = filepath.Dir(mainPath)
 }
@@ -35,6 +35,7 @@ type runtimeVerbose struct {
 }
 
 var initRuntimeVMutex = &sync.Mutex{}
+
 // initiliaze from the entry point determmined at runtime
 func (r *runtimeVerbose) InitFromMain() {
 	initRuntimeVMutex.Lock()
@@ -212,8 +213,8 @@ func Auto() *printer.Logger {
 func From(name string) *printer.Logger {
 	initRuntimeVerbose()
 	return &printer.Logger{
-		Name:     name,
-		Enabled:  runtimeV.isEnabled(name),
-    Color:    color.PickColor(),
+		Name:    name,
+		Enabled: runtimeV.isEnabled(name),
+		Color:   color.PickColor(),
 	}
 }

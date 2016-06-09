@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"log"
 
-  "github.com/mh-cbon/verbose/color"
+	"github.com/mh-cbon/verbose/color"
 )
 
 var currentPrinter Printer
@@ -17,9 +17,9 @@ func SetPrinter(p Printer) {
 
 // instance of a logger
 type Logger struct {
-	Name     string
-	Enabled  bool
-	Color    color.ColorFunc
+	Name    string
+	Enabled bool
+	Color   color.ColorFunc
 }
 
 // Methods to display messages
@@ -38,7 +38,6 @@ func (l *Logger) Println(a ...interface{}) {
 		currentPrinter.Println(l, a...)
 	}
 }
-
 
 // Printer is the interface to implement to log message via verbose package
 type Printer interface {
