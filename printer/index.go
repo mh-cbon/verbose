@@ -5,40 +5,72 @@ import (
 	"fmt"
 	"log"
 
-  // "github.com/fatih/color"
+  "github.com/mh-cbon/verbose/color"
 )
+
+var currentPrinter Printer
+
+// Configure current Printer
+func SetPrinter(p Printer) {
+	currentPrinter = p
+}
+
+// instance of a logger
+type Logger struct {
+	Name     string
+	Enabled  bool
+	Color    color.ColorFunc
+}
+
+// Methods to display messages
+func (l *Logger) Printf(format string, a ...interface{}) {
+	if l.Enabled {
+		currentPrinter.Printf(l, "%s: "+format, a...)
+	}
+}
+func (l *Logger) Print(a ...interface{}) {
+	if l.Enabled {
+		currentPrinter.Print(l, a...)
+	}
+}
+func (l *Logger) Println(a ...interface{}) {
+	if l.Enabled {
+		currentPrinter.Println(l, a...)
+	}
+}
+
 
 // Printer is the interface to implement to log message via verbose package
 type Printer interface {
-	Printf(pkg string, format string, a ...interface{})
-	Print(pkg string, v ...interface{})
-	Println(pkg string, v ...interface{})
+	Printf(logger *Logger, format string, a ...interface{})
+	Print(logger *Logger, v ...interface{})
+	Println(logger *Logger, v ...interface{})
 }
 
 // A wrapper of go/fmt package
 type FmtPrinter struct{}
 
 // Print with a format
-func (p FmtPrinter) Printf(pkg string, format string, a ...interface{}) {
+func (p FmtPrinter) Printf(logger *Logger, format string, a ...interface{}) {
 	format = "%s " + format
 	b := make([]interface{}, 1)
-	b[0] = pkg
+	b[0] = logger.Color(logger.Name)
 	a = append(b, a...)
 	fmt.Printf(format, a...)
 }
 
 // Print given arguments
-func (p FmtPrinter) Print(pkg string, a ...interface{}) {
+func (p FmtPrinter) Print(logger *Logger, a ...interface{}) {
 	b := make([]interface{}, 1)
-	b[0] = pkg
+	b[0] = logger.Color(logger.Name)
 	a = append(b, a...)
 	fmt.Print(a...)
 }
 
 // Print given arguments with an ending line
-func (p FmtPrinter) Println(pkg string, a ...interface{}) {
+func (p FmtPrinter) Println(logger *Logger, a ...interface{}) {
 	b := make([]interface{}, 1)
-	b[0] = pkg
+	b[0] = logger.Color(logger.Name)
 	a = append(b, a...)
 	fmt.Println(a...)
 }
@@ -47,26 +79,26 @@ func (p FmtPrinter) Println(pkg string, a ...interface{}) {
 type LogPrinter struct{}
 
 // Print with a format
-func (p LogPrinter) Printf(pkg string, format string, a ...interface{}) {
+func (p LogPrinter) Printf(logger *Logger, format string, a ...interface{}) {
 	format = "%s " + format
 	b := make([]interface{}, 1)
-	b[0] = pkg
+	b[0] = logger.Color(logger.Name)
 	a = append(b, a...)
 	log.Printf(format, a...)
 }
 
 // Print given arguments
-func (p LogPrinter) Print(pkg string, a ...interface{}) {
+func (p LogPrinter) Print(logger *Logger, a ...interface{}) {
 	b := make([]interface{}, 1)
-	b[0] = pkg
+	b[0] = logger.Color(logger.Name)
 	a = append(b, a...)
 	log.Print(a...)
 }
 
 // Print given arguments with an ending line
-func (p LogPrinter) Println(pkg string, a ...interface{}) {
+func (p LogPrinter) Println(logger *Logger, a ...interface{}) {
 	b := make([]interface{}, 1)
-	b[0] = pkg
+	b[0] = logger.Color(logger.Name)
 	a = append(b, a...)
 	log.Println(a...)
 }

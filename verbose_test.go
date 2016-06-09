@@ -168,21 +168,21 @@ func TestIsEnabled(t *testing.T) {
 func TestLoggerAuto(t *testing.T) {
 	os.Setenv("VERBOSE", "")
 	logger := Auto()
-	if logger.enabled {
+	if logger.Enabled {
 		t.Errorf("Expected %q got %q\n", false, true)
 	}
-	if logger.name != "github.com/mh-cbon/verbose" {
-		t.Errorf("Expected %q got %q\n", "github.com/mh-cbon/verbose", logger.name)
+	if logger.Name != "github.com/mh-cbon/verbose" {
+		t.Errorf("Expected %q got %q\n", "github.com/mh-cbon/verbose", logger.Name)
 	}
 }
 
 func TestLoggerFrom(t *testing.T) {
 	os.Setenv("VERBOSE", "")
 	logger := From("whatever")
-	if logger.enabled {
+	if logger.Enabled {
 		t.Errorf("Expected %q got %q\n", false, true)
 	}
-	if logger.name != "whatever" {
-		t.Errorf("Expected %q got %q\n", "whatever", logger.name)
+	if logger.Name != "whatever" {
+		t.Errorf("Expected %q got %q\n", "whatever", logger.Name)
 	}
 }

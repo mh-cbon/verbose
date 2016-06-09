@@ -11,15 +11,15 @@ import (
 	"sync"
 
   "github.com/mh-cbon/verbose/printer"
-  "github.com/fatih/color"
+  "github.com/mh-cbon/verbose/color"
 )
 
 var mainPath string
-var mutex = &sync.Mutex{}
-var currentPrinter printer.Printer
 
+// find path of the entry point
+// set default printer
 func init() {
-	currentPrinter = printer.LogPrinter{}
+  SetPrinter(printer.LogPrinter{})
 	_, mainPath, _, _ = runtime.Caller(1)
 	mainPath = filepath.Dir(mainPath)
 }
@@ -34,13 +34,14 @@ type runtimeVerbose struct {
 	hasInit     bool
 }
 
+var initRuntimeVMutex = &sync.Mutex{}
 // initiliaze from the entry point determmined at runtime
 func (r *runtimeVerbose) InitFromMain() {
-	mutex.Lock()
+	initRuntimeVMutex.Lock()
 	if r.hasInit == false {
 		r.Init(mainPath)
 	}
-	mutex.Unlock()
+	initRuntimeVMutex.Unlock()
 }
 
 // initialize from a pre defined entry point
@@ -181,86 +182,38 @@ func (r *runtimeVerbose) isEnabled(from string) bool {
 	return isEnabled
 }
 
-type colorFunc func (format string, a ...interface{}) string
-func getColors () []colorFunc {
-  return []colorFunc{
-    color.CyanString,
-    color.YellowString,
-    color.GreenString,
-    color.MagentaString,
-    color.RedString,
-    color.BlueString,
-    color.WhiteString,
-  }
-}
-
-var colorsFunc = getColors()
-var currentColor = 0
-func pickColor () colorFunc {
-  ret := colorsFunc[currentColor]
-  currentColor++
-  if currentColor>len(colorsFunc) {
-    currentColor = 0
-  }
-  return ret
-}
-
 var runtimeV *runtimeVerbose
-var loggerMutex = &sync.Mutex{}
+var runtimeVMutex = &sync.Mutex{}
 
 func initRuntimeVerbose() {
-	loggerMutex.Lock()
+	runtimeVMutex.Lock()
 	if runtimeV == nil {
 		runtimeV = &runtimeVerbose{}
 	}
 	runtimeV.InitFromMain()
-	loggerMutex.Unlock()
+	runtimeVMutex.Unlock()
+}
+
+// Configure current Printer
+func SetPrinter(p printer.Printer) {
+	printer.SetPrinter(p)
 }
 
 // Automatically determine package name
 // return a new Logger instance
-func Auto() *Logger {
+func Auto() *printer.Logger {
 	initRuntimeVerbose()
 	_, file, _, _ := runtime.Caller(1)
 	name := runtimeV.DeterminePackage(file)
 	return From(name)
 }
 
-// Return a new Logger with given name
-func From(name string) *Logger {
+// Return a new printer.Logger with given name
+func From(name string) *printer.Logger {
 	initRuntimeVerbose()
-	return &Logger{
-		name:     name,
-		enabled:  runtimeV.isEnabled(name),
-    color:    pickColor(),
-	}
-}
-
-// instance of a logger
-type Logger struct {
-	name     string
-	enabled  bool
-	color    colorFunc
-}
-
-// Configure current Printer
-func SetPrinter(p printer.Printer) {
-	currentPrinter = p
-}
-
-// Methods to display messages
-func (l *Logger) Printf(format string, a ...interface{}) {
-	if l.enabled {
-		currentPrinter.Printf(l.color(l.name), "%s: "+format, a...)
-	}
-}
-func (l *Logger) Print(a ...interface{}) {
-	if l.enabled {
-		currentPrinter.Print(l.color(l.name), a...)
-	}
-}
-func (l *Logger) Println(a ...interface{}) {
-	if l.enabled {
-		currentPrinter.Println(l.color(l.name), a...)
+	return &printer.Logger{
+		Name:     name,
+		Enabled:  runtimeV.isEnabled(name),
+    Color:    color.PickColor(),
 	}
 }
