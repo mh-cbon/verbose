@@ -25,7 +25,7 @@ type Logger struct {
 // Methods to display messages
 func (l *Logger) Printf(format string, a ...interface{}) {
 	if l.Enabled {
-		currentPrinter.Printf(l, "%s: "+format, a...)
+		currentPrinter.Printf(l, format, a...)
 	}
 }
 func (l *Logger) Print(a ...interface{}) {
