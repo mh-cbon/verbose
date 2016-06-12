@@ -157,11 +157,11 @@ func TestIsEnabled(t *testing.T) {
 	r.Init(somePackagePath)
 
 	if r.isEnabled("asomething") != true {
-		t.Errorf("Expected %q got %q\n", true, false)
+		t.Errorf("Expected %t got %t\n", true, false)
 	}
 
 	if r.isEnabled("b") != false {
-		t.Errorf("Expected %q got %q\n", false, true)
+		t.Errorf("Expected %t got %t\n", false, true)
 	}
 }
 
@@ -169,7 +169,7 @@ func TestLoggerAuto(t *testing.T) {
 	os.Setenv("VERBOSE", "")
 	logger := Auto()
 	if logger.Enabled {
-		t.Errorf("Expected %q got %q\n", false, true)
+		t.Errorf("Expected %t got %t\n", false, true)
 	}
 	if logger.Name != "github.com/mh-cbon/verbose" {
 		t.Errorf("Expected %q got %q\n", "github.com/mh-cbon/verbose", logger.Name)
@@ -180,7 +180,7 @@ func TestLoggerFrom(t *testing.T) {
 	os.Setenv("VERBOSE", "")
 	logger := From("whatever")
 	if logger.Enabled {
-		t.Errorf("Expected %q got %q\n", false, true)
+		t.Errorf("Expected %t got %t\n", false, true)
 	}
 	if logger.Name != "whatever" {
 		t.Errorf("Expected %q got %q\n", "whatever", logger.Name)
