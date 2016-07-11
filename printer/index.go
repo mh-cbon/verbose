@@ -3,7 +3,9 @@ package printer
 
 import (
 	"fmt"
+	"strings"
 	"log"
+	"os"
 
 	"github.com/mh-cbon/verbose/color"
 )
@@ -55,7 +57,7 @@ func (p FmtPrinter) Printf(logger *Logger, format string, a ...interface{}) {
 	b := make([]interface{}, 1)
 	b[0] = logger.Color(logger.Name)
 	a = append(b, a...)
-	fmt.Printf(format, a...)
+  fmt.Fprintf(os.Stderr, format, a...)
 }
 
 // Print given arguments
@@ -63,7 +65,7 @@ func (p FmtPrinter) Print(logger *Logger, a ...interface{}) {
 	b := make([]interface{}, 1)
 	b[0] = logger.Color(logger.Name)
 	a = append(b, a...)
-	fmt.Print(a...)
+  fmt.Fprint(os.Stderr, a...)
 }
 
 // Print given arguments with an ending line
@@ -71,7 +73,8 @@ func (p FmtPrinter) Println(logger *Logger, a ...interface{}) {
 	b := make([]interface{}, 1)
 	b[0] = logger.Color(logger.Name)
 	a = append(b, a...)
-	fmt.Println(a...)
+  format := strings.Repeat("%s ", len(b))
+  fmt.Fprintf(os.Stderr, format, a...)
 }
 
 // A wrapper of go/log package
