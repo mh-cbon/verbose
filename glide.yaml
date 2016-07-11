@@ -1,6 +1,8 @@
 package: github.com/mh-cbon/verbose
 scripts:
-  preversion: git fetch --tags && philea "go vet %s" "go fmt %s"
+  prebump: git fetch --tags
+  preversion: |
+    philea -s "666 go vet %s" "666 go-fmt-fail %s"
   postversion: git push && git push --tags
 import:
 - package: github.com/fatih/color
